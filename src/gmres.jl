@@ -41,22 +41,18 @@ function gmres{T}(A, b::Vector{T}, Pl=x->x, Pr=x->x, x=nothing; tol=sqrt(eps()),
     A_(x) = isa(A, Function) ? A(x) : A*x 
     Pl_(x) = isa(Pl, Function) ? Pl(x) : Pl\x 
     Pr_(x) = isa(Pr, Function) ? Pr(x) : Pr\x 
-    tol = tol * norm(Pl_(b))
-    resnorms = zeros(T, maxiter, restart)
+    tol *= norm(Pl_(b))
+    resnorms = zeros(maxiter, restart)
     isconverged = false
     for iter = 1:maxiter
-        w    = b - A_(x)
-        w    = Pl_(w)
-        rho  = norm(w)
-        s[1] = rho
+        w    = Pl_(b - A_(x))
+        s[1] = rho = norm(w)
         V[1] = w / rho
 
         N = restart
         for j = 1:restart
             #Calculate next orthonormal basis vector in the Krylov subspace
-            w = Pr_(V[j])
-            w = A_(w)
-            w = Pl_(w)
+            w = Pl_(A_(Pr_(V[j])))
 
             #Gram-Schmidt
             for k = 1:j
@@ -116,7 +112,7 @@ function gmres{T}(A, b::Vector{T}, Pl=x->x, Pr=x->x, x=nothing; tol=sqrt(eps()),
                 a[j] -= H[j,k] * a[k]
             end
 
-            a[j] = a[j] / H[j,j]
+            a[j]/= H[j,j]
             w   += a[j] * V[j]
         end
 
