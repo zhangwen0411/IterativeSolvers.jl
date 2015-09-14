@@ -1,4 +1,4 @@
-module IterativeSolvers
+module MyIterativeSolvers
 
 isdefined(:__precompile__) && __precompile__(true)
 
