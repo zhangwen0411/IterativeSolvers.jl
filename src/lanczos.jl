@@ -18,17 +18,7 @@ function lanczos!{T}(K::KrylovSubspace{T})
     SymTridiagonal(αs, βs)
 end
 
-function eigvals_lanczos(A, neigs::Int=size(A,1); tol::Real=size(A,1)^3*eps(), maxiter::Int=size(A,1))
-    K = KrylovSubspace(A, 2) #In Lanczos, only remember the last two vectors
-    eigvals_lanczos(K, neigs, tol, maxiter)
-end
-
-function eigvals_lanczos(A, n::Int, T::Type, neigs::Int=n; tol::Real=n^3*eps(), maxiter::Int=n)
-    K = KrylovSubspace(A, n, 2, T) #In Lanczos, only remember the last two vectors
-    eigvals_lanczos(K, neigs, tol, maxiter)
-end
-
-function eigvals_lanczos{T}(K::KrylovSubspace{T}, neigs::Int; tol::Real=size(A,1)^3*eps(), maxiter::Int=size(A,1))
+function krylov_eigvals_lanczos{T}(K::KrylovSubspace{T}, neigs::Int, tol::Real, maxiter::Int)
     initrand!(K)
     resnorms = zeros(maxiter)
     e1 = eigvals(lanczos!(K), 1:neigs)
@@ -43,3 +33,12 @@ function eigvals_lanczos{T}(K::KrylovSubspace{T}, neigs::Int; tol::Real=size(A,1
     e1, ConvergenceHistory(0<=resnorms[end]<tol, tol, K.mvps, resnorms)
 end
 
+function eigvals_lanczos(A, neigs::Int=size(A,1); tol::Real=size(A,1)^3*eps(), maxiter::Int=size(A,1))
+    K = KrylovSubspace(A, 2) #In Lanczos, only remember the last two vectors
+    krylov_eigvals_lanczos(K, neigs, tol, maxiter)
+end
+
+function eigvals_lanczos(A, n::Int, T::Type, neigs::Int=n; tol::Real=n^3*eps(), maxiter::Int=n)
+    K = KrylovSubspace(A, n, 2, T) #In Lanczos, only remember the last two vectors
+    krylov_eigvals_lanczos(K, neigs, tol, maxiter)
+end
