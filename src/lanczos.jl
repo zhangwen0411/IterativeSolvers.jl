@@ -20,6 +20,15 @@ end
 
 function eigvals_lanczos(A, neigs::Int=size(A,1); tol::Real=size(A,1)^3*eps(), maxiter::Int=size(A,1))
     K = KrylovSubspace(A, 2) #In Lanczos, only remember the last two vectors
+    eigvals_lanczos(K, neigs, tol, maxiter)
+end
+
+function eigvals_lanczos(A, n::Int, T::Type, neigs::Int=n; tol::Real=n^3*eps(), maxiter::Int=n)
+    K = KrylovSubspace(A, n, 2, T) #In Lanczos, only remember the last two vectors
+    eigvals_lanczos(K, neigs, tol, maxiter)
+end
+
+function eigvals_lanczos(K::KrylovSubspace{T}, neigs::Int; tol::Real=size(A,1)^3*eps(), maxiter::Int=size(A,1))
     initrand!(K)
     resnorms = zeros(maxiter)
     e1 = eigvals(lanczos!(K), 1:neigs)
